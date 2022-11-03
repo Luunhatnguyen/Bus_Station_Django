@@ -1,0 +1,253 @@
+{% extends 'admin/base_site.html' %}
+{% block content %}
+{% for u in user.groups.all %}
+{% if u.name == "booking_clerk" %}
+<link href="https://cdn.jsdelivr.net/npm/tom-select@2.0.2/dist/css/tom-select.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/tom-select@2.0.2/dist/js/tom-select.complete.min.js"></script>
+<style>
+    h1{
+        margin: 30px;
+        color: red;
+        text-align: center;
+    }
+    .contain{
+        width: 70%;
+        margin: auto;
+    }
+    .column3 {
+      float: left;
+      width: 30%;
+      padding: 10px;
+      border: 2px solid;
+      margin: 1px;
+    }
+    .column3-label{
+        color: red;
+    }
+    button{
+        margin: 10px;
+        border: None;
+        background-color: red;
+        color: white;
+        font-size: 20px;
+        font-weight: 500px;
+        text-align: center;
+        width: 130px;
+    }
+    row-margin {
+        margin: 50px 0;
+    }
+</style>
+
+<h1>CREATE BOOKING</h1>
+<div class="contain">
+    <form id="booking">
+        <lable>Name:</lable>
+        <input type="text" id="Name" name="name">
+        <lable>Phone:</lable>
+        <input type="text" id="Phone" name="phone">
+        <lable>Time Table:</lable>
+        <select id="timeTable" name="timeTable" placeholder="Tìm kiếm theo ngày giờ xuất phát hoặc chuyến đi...">
+            <option value="" selected="selected"></option>
+            {% for t in timeTable %}
+            <option value={{t.id}}>{{t}}</option>
+            {% endfor %}
+        </select>
+    </form>
+    <button onclick="postBooking()">CREATE</button>
+</div>
+<h1>ADD BOOKING DETAIL</h1>
+<div class="contain">
+    <form id="bookingDetail">
+        <label>Don hang:</label>
+        <select id="bookingID" name="bookingID">
+            <option value="">Chon don hang...</option>
+            {% for b in booking %}
+            <option value={{b.id}}>{{b}}</option>
+            {% endfor %}
+        </select>
+        <lable>Garage:</lable>
+        <select id="from_garage" name="from_garage">
+        </select>
+        <lable>Seat:</lable>
+        <select id="seat" name="seatID">
+        </select>
+    </form>
+    <button onclick="postBookingDetail()">ADD</button>
+</div>
+<h1>PAYMENT</h1>
+<div class="contain">
+{% for h in history %}
+<div class="row" style="margin: 50px 0">
+    <div class="column3">
+        <label class="column3-label">Don hang:</label><br>
+        <span>{{h.bookingID}}</span>
+    </div>
+    <div class="column3">
+        <lable class="column3-label">Name:</lable><br>
+        <span>{{h.bookingID.customerID}}_{{h.bookingID.name}}</span>
+    </div>
+    <div class="column3">
+        <lable class="column3-label">Phone:</lable><br>
+        <span>{{h.bookingID.phone}}</span>
+    </div>
+    <div class="column3">
+        <lable class="column3-label">TimeTable:</lable><br>
+        <p>{{h.bookingID.timeTable.date}}</p>
+        <p>{{h.bookingID.timeTable.time}}</p>
+        <p>{{h.bookingID.timeTable.busRouteID}}</p>
+    </div>
+    <div class="column3">
+        <lable class="column3-label">Seat:</lable><br>
+        <div>
+            {% for d in detail %}
+                {% if d.bookingID.id == h.bookingID.id %}
+                <p>{{d.seatID.location}}-{{h.bookingID.timeTable.busRouteID.price}}:VND</p>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+    <div class="column3">
+        <label class="column3-label">Status:</label><br>
+        <span>{{h.statusID}}</span>
+    </div>
+    <div class="column3">
+        <label class="column3-label">Total:</label><br>
+        <span style="font-size: 20px; font-weight:800">
+            {{h.total}}
+        </span><br>
+    </div>
+    <div class="column3" style="text-align: center;">
+        <Button style="background-color: green;" onclick="payment({{h.bookingID.id}})">PAYMENT</Button>
+    </div>
+    <div class="column3"  style="text-align: center;">
+        <Button style="background-color: red;" onclick="deleteBooking({{h.bookingID.id}})">DELETE</Button>
+    </div>
+</div>
+{% endfor %}
+</div>
+<script>
+    new TomSelect("#timeTable",{
+        sortField: {
+            field: "text",
+            direction: "asc"
+        }
+    })
+
+    const loadGarage = () => {
+        var e = document.getElementById("bookingID");
+        var value = e.options[e.selectedIndex].value;
+
+        fetch(`/bookings/${value}`, {
+         headers: {'Content-Type': 'application/json', 'charset': 'utf-8'},
+         method: 'GET',
+         }).then(response => response.json())
+            .then(data => {
+
+                fetch(`/timetables/${data.timeTable}/seat/`,{
+                    method: 'GET',
+                }).then(response => response.json())
+                    .then(data => {
+                        var x = document.getElementById("seat");
+                        var length = x.options.length;
+                        for (i = length-1; i >= 0; i--) {
+                            x.options[i] = null;
+                        }
+                        for(var i = 0; i < data.length; i++){
+                            var option = document.createElement("option");
+                            option.text = data[i].location;
+                            option.value = data[i].id
+                            x.add(option);
+                        }
+                    })
+
+                fetch(`/timetables/${data.timeTable}/garage/`, {
+                  method: 'GET',
+                }).then(response => response.json())
+                    .then(data => {
+                        var x = document.getElementById("from_garage");
+                        var length = x.options.length;
+                        for (i = length-1; i >= 0; i--) {
+                            x.options[i] = null;
+                        }
+                        for(var i = 0; i < data.length; i++){
+                            var option = document.createElement("option");
+                            option.text = data[i].address;
+                            option.value = data[i].id
+                            x.add(option);
+                        }})
+        })
+    }
+
+    var eventHandler = () => {
+        return function() {
+        var e = document.getElementById("bookingID");
+        var value = e.options[e.selectedIndex].value;
+        loadGarage()
+    }}
+
+    new TomSelect("#bookingID",{
+        onChange        : eventHandler(),
+        sortField: {
+            field: "text",
+            direction: "asc"
+        }
+    })
+
+    const postBooking = () => {
+        var form = new FormData(document.getElementById('booking'));
+        fetch('/bookings/', {
+          method: 'POST',
+          body: form
+        }).then(response => response.json())
+            .then(data => { console.log(data);
+                            fetch('/bookings/last-book/',{method: 'GET'})
+                                .then(response => response.json())
+                                .then(data => { console.log(data);
+                                                const form = JSON.stringify({"bookingID":data.id,"statusID":2});
+                                                fetch('/bookinghistorys/', {
+                                                headers: {'Content-Type': 'application/json', 'charset': 'utf-8'},
+                                                method: 'POST',
+                                                body: form
+                                                }).then(response => response.json())
+                                                    .then(data => {console.log(data);window.location.reload();});
+                                               }
+                                      )
+                          }
+                 )
+    }
+
+    const postBookingDetail = () => {
+        const form = new FormData(document.getElementById('bookingDetail'));
+        fetch('/bookingdetails/', {
+          method: 'POST',
+          body: form
+        }).then(response => response.json())
+            .then(data => {console.log(data);window.location.reload();})
+    }
+
+    const payment = (id) => {
+        const form = JSON.stringify({"bookingID":id,"statusID":1});
+        fetch(`/bookinghistorys/${id}/`,{
+            headers: {'Content-Type': 'application/json', 'charset': 'utf-8'},
+            method: 'PUT',
+            body: form
+        }).then(response => response.json())
+            .then(data => {console.log(data);window.location.reload();})
+    }
+
+    const deleteBooking = (id) => {
+        const form = JSON.stringify({"bookingID":id});
+        fetch(`/bookings/${id}/`,{
+            headers: {'Content-Type': 'application/json', 'charset': 'utf-8'},
+            method: 'DELETE',
+            body: form
+        })
+    }
+
+</script>
+{% else %}
+<h1 class="text-center text-danger">YOU ARE DO NOT HAVE PERMISSION TO SEE THIS VIEW!!</h1>
+{% endif %}
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,209 @@
+{% extends 'admin/base_site.html' %}
+{% block content %}
+{% if user.is_superuser %}
+<h1 class="text-center text-danger">Revenue Statistics</h1>
+<br />
+<br />
+<br />
+<br />
+<div class="row">
+  {% if month_route and year_route and filterRoute %}
+      <h1 class="text-center text-danger">Time Tabel by Route {{route.0}} in {{month_route}}, {{year_route}}</h1>
+      <h1 class="text-center text-danger">Percent is {{routePercent}} in {{month_route}}, {{year_route}}</h1>
+  {% elif month_route and filterRoute %}
+      <h1 class="text-center text-danger">Time Tabel by Route {{route.0}} in {{month_route}}</h1>
+      <h1 class="text-center text-danger">Percent is {{routePercent}} in {{month_route}} this year</h1>
+  {% elif year_route and filterRoute %}
+      <h1 class="text-center text-danger">Time Tabel by Route {{route.0}}  in {{year_route}}</h1>
+      <h1 class="text-center text-danger">Percent is {{routePercent}} in {{year_route}}</h1>
+  {% elif filterRoute %}
+      <h1 class="text-center text-danger">Time Tabel by Route {{route.0}}</h1>
+      <h1 class="text-center text-danger">Percent is {{routePercent}} of all</h1>
+  {% elif month_route %}
+      <h1 class="text-center text-danger">Time Tabel by Route in {{month_route}} this year</h1>
+  {% elif year_route %}
+      <h1 class="text-center text-danger">Time Tabel by Route in {{year_route}}</h1>
+  {% else %}
+      <h1 class="text-center text-danger">Time Tabel by Route</h1>
+  {% endif %}
+  <div class="col-md-6 col-xs-12">
+      <canvas id="routeChartId" height="200"></canvas>
+  </div>
+  <div class="col-md-5 col-xs-12">
+    <form action="" method="get">
+      <label style="width: 120px">Route</label>
+        <select
+          class="usa-select"
+          name="filterRoute"
+          style="width: 75%; height: 50px; margin: 5px;"
+        >
+          <option selected="selected" value="">No filter</option>
+          {% for r in routeStatic %}
+          <option value="{{r.id}}">{{r}}</option>
+          {% endfor %}
+        </select>
+
+      <label style="width: 120px">Month</label>
+      <div class="form-group">
+        <select
+          class="usa-select"
+          name="month_route"
+          style="width: 75%; height: 50px; margin: 5px;"
+        >
+          <option selected="selected" value="">No filter</option>
+          <option value="1">January</option>
+          <option value="2">February</option>
+          <option value="3">March</option>
+          <option value="4">April</option>
+          <option value="5">May</option>
+          <option value="6">June</option>
+          <option value="7">July</option>
+          <option value="8">August</option>
+          <option value="9">September</option>
+          <option value="10">October</option>
+          <option value="11">November</option>
+          <option value="12">December</option>
+        </select>
+        <label style="width: 120px">Year</label>
+        <select
+          class="usa-select"
+          name="year_route"
+          style="width: 75%; height: 50px; margin: 5px;"
+        >
+          <option selected="selected" value="">No filter</option>
+          {% for i in year_range %}
+          <option value="{{i}}">{{i}}</option>
+          {% endfor %}
+        </select>
+        <input type="submit" value="Statistics" class="btn btn-danger" />
+      </div>
+    </form>
+  </div>
+</div>
+<div class="row">
+  {% if month_revenue and year_revenue %}
+      <h1 class="text-center text-danger">Revenue by Route in {{month_revenue}}, {{year_revenue}}</h1>
+      <h1 class="text-center text-danger">Percent is {{revenuePercent}} of all</h1>
+  {% elif month_revenue %}
+      <h1 class="text-center text-danger">Revenue by Route in {{month_revenue}}</h1>
+      <h1 class="text-center text-danger">Percent is {{revenuePercent}} of this year</h1>
+  {% elif year_revenue %}
+      <h1 class="text-center text-danger">Revenue by Route in {{year_revenue}}</h1>
+      <h1 class="text-center text-danger">Percent is {{revenuePercent}} of all</h1>
+  {% else %}
+      <h1 class="text-center text-danger">Revenue by Route</h1>
+  {% endif %}
+  <div class="col-md-6 col-xs-12">
+      <canvas id="revenueChartId" height="200"></canvas>
+  </div>
+  <div class="col-md-5 col-xs-12">
+    <form action="" method="get">
+
+      <label style="width: 120px">Month</label>
+      <div class="form-group">
+        <select
+          class="usa-select"
+          name="month_revenue"
+          style="width: 75%; height: 50px; margin: 5px;"
+        >
+          <option selected="selected" value="">No filter</option>
+          <option value="1">January</option>
+          <option value="2">February</option>
+          <option value="3">March</option>
+          <option value="4">April</option>
+          <option value="5">May</option>
+          <option value="6">June</option>
+          <option value="7">July</option>
+          <option value="8">August</option>
+          <option value="9">September</option>
+          <option value="10">October</option>
+          <option value="11">November</option>
+          <option value="12">December</option>
+        </select>
+        <label style="width: 120px">Year</label>
+        <select
+          class="usa-select"
+          name="year_revenue"
+          style="width: 75%; height: 50px; margin: 5px;"
+        >
+          <option selected="selected" value="">No filter</option>
+          {% for i in year_range %}
+          <option value="{{i}}">{{i}}</option>
+          {% endfor %}
+        </select>
+        <input type="submit" value="Statistics" class="btn btn-danger" />
+      </div>
+    </form>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+
+const fixFloat = (value) => {
+  return `${value.toFixed(2)}%`
+}
+
+      let labels = [], labels2 = []
+      let data = [], data2 = []
+      let colors = [], colors2 = []
+      let borderColors = [], borderColors2 = []
+      let rc, gc, bc;
+
+      {% for r in route %}
+      labels.push('{{r}}')
+      data.push('{{r.timeTable}}')
+
+      r = parseInt(Math.random() * 255)
+      g = parseInt(Math.random() * 255)
+      b = parseInt(Math.random() * 255)
+
+      colors.push(`rgba(${r}, ${g}, ${b}, 0.2)`)
+      borderColors.push(`rgba(${r}, ${g}, ${b}, 1)`)
+      {% endfor %}
+
+      {% for r in revenue %}
+      labels2.push('{{r}}')
+      data2.push('{{r.total}}')
+
+      r = parseInt(Math.random() * 255)
+      g = parseInt(Math.random() * 255)
+      b = parseInt(Math.random() * 255)
+
+      colors2.push(`rgba(${r}, ${g}, ${b}, 0.2)`)
+      borderColors2.push(`rgba(${r}, ${g}, ${b}, 1)`)
+      {% endfor %}
+
+window.onload = function() {
+          const ctx = document.getElementById('routeChartId').getContext('2d');
+          const ctx2 = document.getElementById('revenueChartId').getContext('2d');
+          loadChart(ctx, labels, data, 'bar', colors, borderColors);
+          loadChart(ctx2, labels2, data2, 'bar', colors2, borderColors2);
+      }
+
+  function loadChart(ctx, labels, data, type, colors, borderColors) {
+      const myChart = new Chart(ctx, {
+          type: type,
+          data: {
+              labels: labels,
+              datasets: [{
+                  label: '',
+                  data: data,
+                  backgroundColor: colors,
+                  borderColor: borderColors,
+                  borderWidth: 1
+              }]
+          },
+          options: {
+              scales: {
+                  y: {
+                      beginAtZero: true
+                  }
+              }
+          }
+      });
+  }
+</script>
+{% else %}
+<h1 class="text-center text-danger">YOU ARE DO NOT HAVE PERMISSION TO SEE THIS VIEW!!</h1>
+{% endif %}
+{% endblock %}
