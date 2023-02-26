@@ -72,8 +72,8 @@ DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
 DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME = 0.5  # Time in hours
 
 OAUTH2_INFO = {
-    "client_id": "jdQwFQXDlSFMfAqcebshJmq9VklxYy4FLGOvv3Vl",
-    "client_secret": "dgYSIyFtPWUVwU0piUu8ORlXoTJRM81lXA79QbWBFxGH9lRyi4rYmMduGjimuJOKG4X1Z1X3onhZTRtprTGzxsFLtEfdDdPkGP3Jk34xgod60MREQoB9Lyg44zsuSvbO",
+    "client_id": "oTnoWMutaxsKjIr6LNBs2sOeK58wKnOcr1ZXVCic",
+    "client_secret": "pbkdf2_sha256$320000$EiUAUMFXljPDuOTBMzj1by$7dTFwDezvTkj7gx9rrc2TCsXdbKK8n5Vb7GoEr/Lijk=",
 }
 
 OAUTH2_PROVIDER = {
