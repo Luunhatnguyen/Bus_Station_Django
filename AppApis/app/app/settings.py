@@ -72,8 +72,8 @@ DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
 DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME = 0.5  # Time in hours
 
 OAUTH2_INFO = {
-    "client_id": "jdQwFQXDlSFMfAqcebshJmq9VklxYy4FLGOvv3Vl",
-    "client_secret": "dgYSIyFtPWUVwU0piUu8ORlXoTJRM81lXA79QbWBFxGH9lRyi4rYmMduGjimuJOKG4X1Z1X3onhZTRtprTGzxsFLtEfdDdPkGP3Jk34xgod60MREQoB9Lyg44zsuSvbO",
+    "client_id": "maSzNJzP3CdNyGg9yQbMcaTz3gMVMjodKyNJyD7v",
+    "client_secret": "E9JkNbgsr5JYabBvbyHOSuEkT8FrueHogHcvW8y6Xu80sKMT7MkDYMMFmsQAiWfYQYRHECb5k7z5x8TXv71djMEl5KyIOSEDGN8VdbVfm7B8hthmrQ7ySYbI1ii3bkTS",
 }
 
 OAUTH2_PROVIDER = {
@@ -146,7 +146,7 @@ WSGI_APPLICATION = 'app.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ticketappdb',
+        'NAME': 'ticketappdb1',
         'USER': 'root',
         'PASSWORD': '123456',
         'HOST': '' # mặc định localhost
