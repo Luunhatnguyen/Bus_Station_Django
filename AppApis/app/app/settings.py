@@ -52,11 +52,13 @@ INSTALLED_APPS = [
     'drf_yasg',
     "corsheaders",
     'django_rest_passwordreset',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ]
 }
 
@@ -72,8 +74,8 @@ DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
 DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME = 0.5  # Time in hours
 
 OAUTH2_INFO = {
-    "client_id": "jdQwFQXDlSFMfAqcebshJmq9VklxYy4FLGOvv3Vl",
-    "client_secret": "dgYSIyFtPWUVwU0piUu8ORlXoTJRM81lXA79QbWBFxGH9lRyi4rYmMduGjimuJOKG4X1Z1X3onhZTRtprTGzxsFLtEfdDdPkGP3Jk34xgod60MREQoB9Lyg44zsuSvbO",
+    "client_id": "lOs4PSGcB0IMMRIE6oRfTfwxjkrhFQEab0OzHmgN",
+    "client_secret": "CUb5I4evFSsVK0tql2YP0UazqzOIEvzzjQyQmg3O662KHNeAKrLppKhkJXb4ZfZKrWGRYNRLG89v6wFgzVD01CmoN0rcRYu09hVavzoooGUHXHLeRSN8iKOjtVTPk15c",
 }
 
 OAUTH2_PROVIDER = {
@@ -146,7 +148,7 @@ WSGI_APPLICATION = 'app.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'ticketappdb',
+        'NAME': 'ticketappdb1',
         'USER': 'root',
         'PASSWORD': '123456',
         'HOST': '' # mặc định localhost
@@ -200,10 +202,10 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = '1951052134nguyen@ou.edu.vn'
-EMAIL_HOST_PASSWORD = 'coemtiphu2'
+EMAIL_HOST_USER = 'nhatnguyen.01102001@gmail.com'
+EMAIL_HOST_PASSWORD = 'bnbtlglyftisynpt'
 
-
+#momo
 MOMO_SECRET_KEY = config('MOMO_SECRET_KEY', default='')
 MOMO_ACCESS_KEY = config('MOMO_ACCESS_KEY', default='')
 MOMO_PARTNER_CODE = config('MOMO_PARTNER_CODE', default='')
@@ -217,6 +219,10 @@ ZALO_KEY2 = config('ZALO_KEY2', default='')
 ZALO_URL_CREATE = config('ZALO_URL_CREATE', default='')
 ZALO_URL_GET_STATUS = config('ZALO_URL_GET_STATUS', default='')
 
+#auth-social config
+GOOGLE_CLIENT_ID = '220466306476-5ob9trc1soalp0t2djma5f23jplrkga2.apps.googleusercontent.com'
+GOOGLE_CLIENT_SECRET = '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'
+SOCIAL_SECRET = '@gbklknspajdoughwblwdoiushuolnjhsuyu5w#@#%$'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
