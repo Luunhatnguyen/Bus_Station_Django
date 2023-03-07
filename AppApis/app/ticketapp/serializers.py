@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
-
+from .register import register_social_user
+from . import  google, facebook
 from .models import *
 
 
@@ -229,3 +230,49 @@ class RatingSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rating
         fields = ['id', 'busroute', 'rate', 'user', 'comment']
+
+
+class GoogleSocialAuthSerializer(serializers.Serializer):
+    auth_token = serializers.CharField()
+
+    def validate_auth_token(self, auth_token):
+        user_data = google.Google.validate(auth_token)
+        try:
+            user_data['sub']
+        except:
+            raise serializers.ValidationError(
+                'The token is invalid or expired. Please login again.'
+            )
+
+        # if user_data['aud'] != settings.GOOGLE_CLIENT_ID:
+        #     raise AuthenticationFailed('we cannot authenticate for you!!!')
+        email = user_data['email']
+        name = user_data['email']
+        provider = 'google'
+
+        return register_social_user(
+            provider=provider, email=email, name=name)
+
+
+class FacebookSocialAuthSerializer(serializers.Serializer):
+    auth_token = serializers.CharField()
+
+    def validate_auth_token(self, auth_token):
+        user_data = facebook.Facebook.validate(auth_token)
+
+        try:
+        # user_id = user_data['id']
+            email = user_data['email']
+            name = user_data['name']
+            provider = 'facebook'
+            return register_social_user(
+                provider=provider,
+                # user_id=user_id,
+                email=email,
+                name=name
+            )
+        except Exception:
+
+            raise serializers.ValidationError(
+                'The token  is invalid or expired. Please login again.'
+            )

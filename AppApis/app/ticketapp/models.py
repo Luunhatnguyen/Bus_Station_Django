@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
-
+from rest_framework_simplejwt.tokens import RefreshToken
 
 class ModelBase(models.Model):
     active = models.BooleanField(default=True)
@@ -47,19 +47,36 @@ class Garage(ModelBase):
         return self.name
 
 
+AUTH_PROVIDERS = {'facebook': 'facebook',
+                  'google': 'google',
+                  'default': 'default'
+              }
+
+
 class User(AbstractUser):
     last_login = models.DateTimeField(auto_now_add=True)
     avatar = models.ImageField(null=True, upload_to='users/%Y/%m')
     phone = models.CharField(max_length=11, unique=True, null=True)
+    email = models.EmailField(unique=True, null=True)
     isCarrier = models.BooleanField(default=False)
     garageID = models.ForeignKey(Garage,
                                 related_name='user_garage',
                                 related_query_name='this_user_garage',
                                 null =True,
                                 on_delete=models.SET_NULL, blank=True)
+    auth_provider = models.CharField(
+        max_length=255, blank=False,
+        null=False, default=AUTH_PROVIDERS.get('default'))
 
     def __str__(self):
-        return ("{0}_{1}").format(self.first_name, self.last_name)
+        return self.username
+
+    def tokens(self):
+        refresh = RefreshToken.for_user(self)
+        return {
+            'refresh': str(refresh),
+            'access': str(refresh.access_token)
+        }
 
 
 class Route(ModelBase):
@@ -164,6 +181,7 @@ class Booking(ModelBase):
                                   related_query_name='this_booking_timeTable',
                                   null=True,
                                   on_delete=models.SET_NULL)
+    send_mail = models.BooleanField(default=False)
 
     def __str__(self):
         return ("{0}_{1}_{2}_{3}").format(self.id, self.customerID, self.name, self.phone)
@@ -233,3 +251,8 @@ class Rating(ActionBase):
                                 related_query_name='this_rating_comment',
                                 null=True,
                                 on_delete=models.CASCADE)
+
+
+class CodeConfirm(models.Model):
+    user = models.OneToOneField('User',on_delete=models.CASCADE,primary_key=True)
+    code = models.CharField(max_length=100)

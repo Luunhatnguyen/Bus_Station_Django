@@ -15,7 +15,6 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.hashers import make_password
 from django.http import JsonResponse
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-
 from django.core.mail import EmailMultiAlternatives
 from django.template.loader import render_to_string
 from django.utils.html import strip_tags
@@ -29,9 +28,15 @@ import uuid
 import requests
 import hmac
 import hashlib
+from rest_framework.decorators import action, api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated, AllowAny
+from django.contrib.auth import login, logout
+from django.core.mail import send_mail, EmailMessage
+from rest_framework.generics import GenericAPIView
 
 
-class GarageViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView, generics.RetrieveAPIView):
+class GarageViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView,
+                    generics.RetrieveAPIView):
     queryset = Garage.objects.filter(active=True)
     serializer_class = GarageSerializer
 
@@ -49,7 +54,8 @@ class UserViewSet(viewsets.ViewSet, generics.CreateAPIView):
 
     @action(methods=['get'], detail=False, url_path="current-user")
     def get_current_user(self, request):
-        return Response(self.serializer_class(request.user, context={'request': request}).data, status=status.HTTP_200_OK)
+        return Response(self.serializer_class(request.user, context={'request': request}).data,
+                        status=status.HTTP_200_OK)
 
     # API thay đổi mật khẩu
     @action(methods=['post'], detail=False, url_path="change-password")
@@ -80,8 +86,8 @@ class ResetPasswordView:
     def password_reset_token_created(sender, instance, reset_password_token, *args, **kwargs):
         link_reset = "http://localhost:3000/reset-password/{}".format(reset_password_token.key)
         home = "http://localhost:3000"
-        subject = "Link Reset Password for {title}".format(title="Website Trip")
-        from_email = '1951052134nguyen@ou.edu.vn'
+        subject = "Link Reset Password for {title}".format(title="Bus Station")
+        from_email = None
         to = reset_password_token.user.email
 
         html_content = render_to_string('email_reset_pass.html', {'title': subject, 'link': link_reset, 'home': home})
@@ -92,12 +98,34 @@ class ResetPasswordView:
         msg.send()
 
 
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST['username']
+        password = request.POST['password']
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            login(request, user)
+            return Response(data={'message': "Login successfully"}, status=status.HTTP_202_ACCEPTED)
+        else:
+            return Response(data={'error_msg': "Invalid user"}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([AllowAny])
+def logout_view(request):
+    logout(request)
+    return Response(status=status.HTTP_200_OK)
+
+
 class OauthInfo(APIView):
     def get(self, request):
         return Response(settings.OAUTH2_INFO, status=status.HTTP_200_OK)
 
 
-class RouteViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView, generics.RetrieveAPIView):
+class RouteViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView,
+                   generics.RetrieveAPIView):
     queryset = Route.objects.filter(active=True)
     serializer_class = RouteSerializer
     pagination_class = TripPagination
@@ -135,7 +163,7 @@ class CarrierViewSet(APIView):
     def post(self, request):
         serializer = CarrierLoginSerializer(data=request.data)
         if serializer.is_valid():
-            if serializer.validated_data['isCarrier']==True :
+            if serializer.validated_data['isCarrier'] == True:
                 user = authenticate(
                     request,
                     username=serializer.validated_data['username'],
@@ -162,9 +190,9 @@ class CarrierViewSet(APIView):
                     'status_code': 200
                 }, status=status.HTTP_200_OK)
         return Response({
-                'error_messages': serializer.errors,
-                'error_code': 400
-            }, status=status.HTTP_400_BAD_REQUEST)
+            'error_messages': serializer.errors,
+            'error_code': 400
+        }, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TypeBusViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView):
@@ -181,7 +209,8 @@ class TypeBusViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIV
                         status=status.HTTP_200_OK)
 
 
-class BusViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView , generics.RetrieveAPIView):
+class BusViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView,
+                 generics.RetrieveAPIView):
     queryset = Bus.objects.filter(active=True)
     serializer_class = BusSerializer
     pagination_class = BusPagination
@@ -243,29 +272,30 @@ class BusRouteViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPI
                                                context={'request': request}).data,
                         status=status.HTTP_200_OK)
 
-
     @action(methods=['get'], detail=True, url_path='checked-user')
     def checked_user(self, request, pk):
         busroute = self.get_object()
         user = User.objects.filter(this_booking_user__timeTable__busRouteID__id=busroute.id)
-        return Response(data=UserSerializer(user,many=True,
-                                               context={'request': request}).data,
+        return Response(data=UserSerializer(user, many=True,
+                                            context={'request': request}).data,
                         status=status.HTTP_200_OK)
 
 
-class SeatViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView, generics.RetrieveAPIView):
+class SeatViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView,
+                  generics.RetrieveAPIView):
     queryset = Seat.objects.filter(active=True)
     serializer_class = SeatSerializer
 
 
-class TimeTableViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView, generics.RetrieveAPIView):
+class TimeTableViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView,
+                       generics.RetrieveAPIView):
     queryset = TimeTable.objects.filter(active=True)
     serializer_class = TimeTableSerializer
 
     @action(methods=['get'], detail=True, url_path='booking')
     def get_seatt(self, request, pk):
         timetable = self.get_object()
-        bookings= timetable.booking_timeTable.filter(active=True)
+        bookings = timetable.booking_timeTable.filter(active=True)
 
         bookings = bookings.filter(timeTable=timetable.id)
 
@@ -310,7 +340,8 @@ class TimeTableViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAP
                         status=status.HTTP_200_OK)
 
 
-class BookingViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView, generics.RetrieveAPIView, generics.DestroyAPIView):
+class BookingViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView,
+                     generics.RetrieveAPIView, generics.DestroyAPIView):
     queryset = Booking.objects.filter(active=True)
     serializer_class = BookingSerializer
 
@@ -328,7 +359,7 @@ class BookingViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIV
         seat = Seat.objects.filter(typeBusID=typeBus, active=True)
 
         return Response(data=SeatSerializer(seat,
-                                               context={'request': request}).data,
+                                            context={'request': request}).data,
                         status=status.HTTP_200_OK)
 
     @action(methods=['get'], detail=True, url_path='booking-detail')
@@ -336,18 +367,111 @@ class BookingViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIV
         booking = self.get_object()
         booking_detail = BookingDetail.objects.filter(bookingID=booking.id, active=True)
 
-        return Response(data=BookingDetailSerializer(booking_detail,many=True,
-                                            context={'request': request}).data,
-                        status=status.HTTP_200_OK)
-
-    @action(methods=['get'], detail=True, url_path='booking-delete')
-    def booking_delete(self, request):
-        booking = self.get_object().delete()
-        booking_detail = BookingDetail.objects.filter(bookingID=booking.id, active=True)
-
         return Response(data=BookingDetailSerializer(booking_detail, many=True,
                                                      context={'request': request}).data,
                         status=status.HTTP_200_OK)
+
+
+class BookingEmail(viewsets.ViewSet):
+
+    @action(methods=['post'], detail=False, url_path='send_mail_booking',
+            permission_classes=[permissions.IsAuthenticated])
+    def send_mail(self, request):
+        subject = "Bus Station"
+        url = "https://api.sandbox.africastalking.com/version1/messaging"
+        headers = {'ApiKey': 'fdce86a74390ad6960daf43c08ab23aa727cb1285be2ea1dbd4d61331ed5c83f',
+                   'Content-Type': 'application/x-www-form-urlencoded',
+                   'Accept': 'application/json'}
+
+        if request.method == "POST":
+            name = str(request.data.get("name"))
+            busRoute = str(request.data.get("busRoute"))
+            timeTable = str(request.data.get("timeTable"))
+            NumOfSeat = str(request.data.get("NumOfSeat"))
+            Seat = str(request.data.get("Seat"))
+            BoardingPoint = str(request.data.get("BoardingPoint"))
+            Total = int(request.data.get("Total"))
+            email = str(request.data.get("email"))
+            to = "0767642448"
+
+            message = "Cám ơn " + name + " đã đặt vé tại Bus Station. \n " \
+                                         "Vui lòng check Gmail để xem hóa đơn chi tiết. \n " \
+                                         "Mọi thắc mắc và yêu cầu hỗ trợ liên hệ hotline 0354444899"
+
+            data = {'username': 'sandbox',
+                    'from': '12021',
+                    'message': message,
+                    'to': to
+                    }
+            print(data)
+            try:
+                requests.post(url=url, data=data,
+                              headers=headers)
+            except:
+                Response(status=status.HTTP_400_BAD_REQUEST)
+
+            content = "Hệ thống đã ghi nhận đơn đặt chuyến đi của bạn!!! \nCHI TIẾT   \n" \
+                      "Tên khách hàng: {0}\n" \
+                      "Tên chuyến đi: {1}\n" \
+                      "Ngày khởi hành:{2}\n" \
+                      "Số ghế:{3}\n" \
+                      "Chỗ ngồi:{6}\n" \
+                      "Điểm đón:{4}\n" \
+                      "=====================\n" \
+                      "Tổng tiền cần thanh toán: {5:,.0f} VND\n" \
+                      "=====================\n" \
+                      "Trạng thái thanh toán: Chờ thanh toán \n" \
+                      "=====================\n" \
+                      "Lưu ý:\n" \
+                      "Nếu quý khách chưa thanh toán, vui lòng thanh toán trước thời điểm khởi hành. Nếu quá hạn mà chưa thanh toán thì chuyến đi của quý khách sẽ bị hủy.\n" \
+                      "Bus Station xin chân thành cám ơn.\n" \
+                      "Mọi thắc mắc và yêu cầu hỗ trợ xin gửi về địa chỉ nhatnguyen.01102001@gmail.com""".format(
+                name, busRoute, timeTable,
+                NumOfSeat, BoardingPoint, Total, Seat)
+
+            if content:
+                try:
+                    send_email = EmailMessage(subject, content, to=[email])
+                    send_email.send()
+
+                    return Response(data={
+                        'status': 'Send mail successfully',
+                        'to': email,
+                        'subject': subject,
+                        'content': content
+                    }, status=status.HTTP_200_OK)
+                except:
+                    error_msg = 'Send mail failed !!!'
+            else:
+                error_msg = "Email content error. Check additional customer and tour information"
+        else:
+            error_msg = "No customer email information !!!"
+            return Response(data={'error_msg': error_msg},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+
+class SendMailAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request):
+        email = request.data.get('email')
+        subject = request.data.get('subject')
+        content = request.data.get('content')
+        error_msg = None
+        if email and subject and content:
+            send_email = EmailMessage(subject, content, to=[email])
+            send_email.send()
+        else:
+            error_msg = "Send mail failed !!!"
+        if not error_msg:
+            return Response(data={
+                'status': 'Send mail successfully',
+                'to': email,
+                'subject': subject,
+                'content': content
+            }, status=status.HTTP_200_OK)
+        return Response(data={'error_msg': error_msg},
+                        status=status.HTTP_400_BAD_REQUEST)
 
 
 class BookingStatusViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView):
@@ -495,69 +619,25 @@ class Momo(viewsets.ViewSet):
                                 return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
                             return Response(status=status.HTTP_200_OK)
             return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
-#
-# class Momo(viewsets.ViewSet):
-#     @action(methods=['post'], detail=False, url_path='')
-#     def request_momo(self, request):
-#         endpoint = "https://test-payment.momo.vn/v2/gateway/api/create"
-#         partnerCode = "MOMO"
-#         accessKey = "F8BBA842ECF85"
-#         secretKey = "K951B6PE1waDMi640xX08PD3vg6EkVlz"
-#
-#
-#         #quay về trang cân quay về
-#         redirectUrl = "http://127.0.0.1:8000/"
-#         #mô tả thông tin đơn hàng
-#         orderInfo = "Bus Station"
-#         #ipnUrl = "https://webhook.site/b3088a6a-2d17-4f8d-a383-71389a6c600b"
-#         ipnUrl = "http://127.0.0.1:8000/"
-#         orderId = str(uuid.uuid4())
-#         requestId = str(uuid.uuid4())
-#         requestType = "captureWallet"
-#         extraData = ""  # pass empty value or Encode base64 JsonString
-#
-#         # before sign HMAC SHA256 with format: accessKey=$accessKey&amount=$amount&extraData=$extraData&ipnUrl=$ipnUrl
-#         # &orderId=$orderId&orderInfo=$orderInfo&partnerCode=$partnerCode&redirectUrl=$redirectUrl&requestId=$requestId
-#         # &requestType=$requestType
-#         if request.method == "POST":
-#             amount = str(request.data.get("amount"))
-#             name = str(request.data.get("name"))
-#             info = str(request.data.get("info"))
-#             orderInfo = name + "\n" + info
-#             rawSignature = "accessKey=" + accessKey + "&amount=" + amount + "&extraData=" + extraData + "&ipnUrl=" + ipnUrl + "&orderId=" + orderId + "&orderInfo=" + orderInfo + "&partnerCode=" + partnerCode + "&redirectUrl=" + redirectUrl + "&requestId=" + requestId + "&requestType=" + requestType
-#
-#         # puts raw signature
-#         print("--------------------RAW SIGNATURE----------------")
-#         print(rawSignature)
-#         # signature
-#         h = hmac.new(bytes(secretKey, 'ascii'), bytes(rawSignature, 'ascii'), hashlib.sha256)
-#         signature = h.hexdigest()
-#         print("--------------------SIGNATURE----------------")
-#         print(signature)
-#
-#         # json object send to MoMo endpoint
-#
-#         data = {
-#             'partnerCode': partnerCode,
-#             'partnerName': "Test",
-#             'storeId': "MomoTestStore",
-#             'requestId': requestId,
-#             'amount': amount,
-#             'orderId': orderId,
-#             'orderInfo': orderInfo,
-#             'redirectUrl': redirectUrl,
-#             'ipnUrl': ipnUrl,
-#             'lang': "vi",
-#             'extraData': extraData,
-#             'requestType': requestType,
-#             'signature': signature
-#         }
-#         print("--------------------JSON REQUEST----------------\n")
-#         data = json.dumps(data)
-#         print(data)
-#
-#         clen = len(data)
-#         response = requests.post(endpoint, data=data,
-#                                  headers={'Content-Type': 'application/json', 'Content-Length': str(clen)})
-#
-#         return Response(data=response.json(), status=status.HTTP_200_OK)
+
+
+class GoogleSocialAuthView(GenericAPIView):
+    serializer_class = GoogleSocialAuthSerializer
+    permission_classes = [permissions.AllowAny]
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = ((serializer.validated_data)['auth_token'])
+        return Response(data, status=status.HTTP_200_OK)
+
+
+class FacebookSocialAuthView(GenericAPIView):
+    serializer_class = FacebookSocialAuthSerializer
+
+    def post(self, request):
+        serializer = self.serializer_class(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        data = ((serializer.validated_data)['auth_token'])
+        return Response(data, status=status.HTTP_200_OK)
+
