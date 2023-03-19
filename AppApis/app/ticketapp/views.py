@@ -179,16 +179,11 @@ class CarrierViewSet(APIView):
                         'refresh_expires': int(settings.SIMPLE_JWT['REFRESH_TOKEN_LIFETIME'].total_seconds())
                     }
                     return Response(data, status=status.HTTP_200_OK)
-
-                return Response({
-                    'error_message': 'Email or password is incorrect!',
-                    'error_code': 400
-                }, status=status.HTTP_400_BAD_REQUEST)
             else:
                 return Response({
-                    'failed': 'You havent permissions',
-                    'status_code': 200
-                }, status=status.HTTP_200_OK)
+                    'failed': 'You haven not permissions',
+                    'status_code': 401
+                }, status=status.HTTP_401_UNAUTHORIZED)
         return Response({
             'error_messages': serializer.errors,
             'error_code': 400
@@ -231,7 +226,8 @@ class BusViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView,
         return list_bus
 
 
-class BusRouteViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView):
+class BusRouteViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView,
+                    generics.RetrieveAPIView):
     queryset = BusRoute.objects.filter(active=True)
     serializer_class = BusRouteSerializer
 
@@ -545,9 +541,6 @@ class Momo(viewsets.ViewSet):
             self.orderInfo = str(request.data.get("name"))
             orderId = str(len(str(request.data.get("orderId")))) + '.' + str(uuid.uuid4()) + str(request.data.get("orderId"))
             requestId = str(len(str(request.data.get("orderId")))) + '.' + str(uuid.uuid4()) + str(request.data.get("orderId"))
-            # rawSignature = "accessKey=" + self.accessKey + "&amount=" + amount  + "&extraData=" + self.extraData + "&ipnUrl=" + self.ipnUrl + "&orderId=" + orderId \
-            #                + "&orderInfo=" + orderInfo + "&partnerCode=" + self.partnerCode + "&redirectUrl=" + self.redirectUrl \
-            #                + "&requestId=" + requestId + "&requestType=" + self.requestType
             rawSignature = "accessKey=" + self.accessKey + "&amount=" + amount + "&extraData=" + self.extraData + "&ipnUrl=" + self.ipnUrl + "&orderId=" + orderId \
                            + "&orderInfo=" + self.orderInfo + "&partnerCode=" + self.partnerCode + "&redirectUrl=" + self.redirectUrl \
                            + "&requestId=" + requestId + "&requestType=" + self.requestType

@@ -82,6 +82,9 @@ class User(AbstractUser):
 class Route(ModelBase):
     image = models.ImageField(null=True, upload_to='image/%Y/%m')
     distance = models.CharField(max_length=255, default="0")
+    point  = models.CharField(max_length=255, default="0")
+    destination = models.CharField(max_length=255, default="0")
+    hours = models.CharField(max_length=255, default="0")
     city_from = models.ForeignKey(City,
                                related_name='route_city',
                                related_query_name='this_route_city',
@@ -252,7 +255,3 @@ class Rating(ActionBase):
                                 null=True,
                                 on_delete=models.CASCADE)
 
-
-class CodeConfirm(models.Model):
-    user = models.OneToOneField('User',on_delete=models.CASCADE,primary_key=True)
-    code = models.CharField(max_length=100)

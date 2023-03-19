@@ -63,7 +63,7 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 
-class CarrierLoginSerializer(serializers.ModelSerializer):
+class CarrierLoginSerializer(serializers.Serializer):
     username = serializers.CharField(required=True)
     password = serializers.CharField(required=True)
     isCarrier = serializers.BooleanField(required=True)
