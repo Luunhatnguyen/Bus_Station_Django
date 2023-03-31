@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from rest_framework_simplejwt.tokens import RefreshToken
 
+
 class ModelBase(models.Model):
     active = models.BooleanField(default=True)
     created_date = models.DateTimeField(auto_now_add=True)
@@ -59,11 +60,7 @@ class User(AbstractUser):
     phone = models.CharField(max_length=11, unique=True, null=True)
     email = models.EmailField(unique=True, null=True)
     isCarrier = models.BooleanField(default=False)
-    garageID = models.ForeignKey(Garage,
-                                related_name='user_garage',
-                                related_query_name='this_user_garage',
-                                null =True,
-                                on_delete=models.SET_NULL, blank=True)
+
     auth_provider = models.CharField(
         max_length=255, blank=False,
         null=False, default=AUTH_PROVIDERS.get('default'))
@@ -110,19 +107,24 @@ class TypeBus(ModelBase):
 
 
 class Bus(ModelBase):
-    busModel = models.CharField(max_length=255)
     typeBusID = models.ForeignKey(TypeBus,
                                 related_name='bus_typeBus',
                                 related_query_name='this_bus_typeBus',
                                 on_delete=models.CASCADE)
     userID = models.ForeignKey(User, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, unique=True)
+    numberplate = models.CharField(max_length=255, unique=True,default=0)
     image = models.ImageField(null=True, upload_to='image/%Y/%m')
     description = models.CharField(max_length=255, default="0")
     rating = models.FloatField(null=True, blank=True)
+    garageID = models.ForeignKey(Garage,
+                                 related_name='user_garage',
+                                 related_query_name='this_user_garage',
+                                 null=True,
+                                 on_delete=models.SET_NULL, blank=True)
 
     def __str__(self):
-        return self.busModel
+        return self.name
 
 
 class BusRoute(ModelBase):

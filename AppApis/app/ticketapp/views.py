@@ -226,6 +226,11 @@ class BusViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView,
         return list_bus
 
 
+class BusRoutePostViewSet(viewsets.ViewSet, generics.CreateAPIView):
+    queryset = BusRoute.objects.filter(active=True)
+    serializer_class = BusRoutePostSerializer
+
+
 class BusRouteViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView,
                     generics.RetrieveAPIView):
     queryset = BusRoute.objects.filter(active=True)
@@ -274,6 +279,16 @@ class BusRouteViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPI
         user = User.objects.filter(this_booking_user__timeTable__busRouteID__id=busroute.id)
         return Response(data=UserSerializer(user, many=True,
                                             context={'request': request}).data,
+                        status=status.HTTP_200_OK)
+
+        # this api to get infor detail BusRoute by Bus id
+    @action(methods=['get'], detail=True, url_path='')
+    def get_route_by_bus(self, request, pk):
+        bus = self.get_object()
+        busID = BusRoute.objects.filter(busID_id=bus.id, active=True)
+
+        return Response(data=BusRouteSerializer(busID, many=True,
+                                                context={'request': request}).data,
                         status=status.HTTP_200_OK)
 
 
@@ -365,6 +380,16 @@ class BookingViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIV
 
         return Response(data=BookingDetailSerializer(booking_detail, many=True,
                                                      context={'request': request}).data,
+                        status=status.HTTP_200_OK)
+
+    @action(methods=['get'], detail=True, url_path='booking-history-by-user')
+    def get_booking_by_userID(self, request, pk):
+        user = self.get_object()
+        # lấy theo bảng user id
+        bookingID = Booking.objects.filter(customerID=user.id, active=True)
+
+        return Response(data=BillSerializer(bookingID, many=True,
+                                               context={'request': request}).data,
                         status=status.HTTP_200_OK)
 
 
@@ -634,3 +659,18 @@ class FacebookSocialAuthView(GenericAPIView):
         data = ((serializer.validated_data)['auth_token'])
         return Response(data, status=status.HTTP_200_OK)
 
+
+#this api to get infor of bus by carrier id
+class BusCarrierViewset(viewsets.ViewSet, generics.RetrieveAPIView):
+    queryset = Bus.objects.filter(active=True)
+    serializer_class = BusSerializer()
+
+    @action(methods=['get'], detail=True, url_path='')
+    def get_bus_by_carrier(self, request, pk):
+        user = self.get_object()
+        # lấy theo bảng user id
+        userID = Bus.objects.filter(userID=user.id, active=True)
+
+        return Response(data=BusSerializer(userID, many=True,
+                                               context={'request': request}).data,
+                        status=status.HTTP_200_OK)

@@ -284,10 +284,10 @@ class TypeBusAdmin(admin.ModelAdmin):
 
 
 class BusAdmin(admin.ModelAdmin):
-    list_display = ('id', 'busModel', 'typeBusID')
+    list_display = ('id', 'typeBusID')
     list_display_links = list_display
     list_filter = ('typeBusID', 'created_date')
-    search_fields = ('id', 'busModel')
+    # search_fields = ('id')
 
 
 class BusRouteAdmin(admin.ModelAdmin):

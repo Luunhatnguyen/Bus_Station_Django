@@ -124,6 +124,12 @@ class BusRouteSerializer(serializers.ModelSerializer):
         fields = ['id', 'price', 'busID', 'routeID', 'rate']
 
 
+class BusRoutePostSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BusRoute
+        fields = "__all__"
+
+
 class SeatSerializer(serializers.ModelSerializer):
     class Meta:
         model = Seat
@@ -138,7 +144,22 @@ class TimeTableSerializer(serializers.ModelSerializer):
         fields = ['id', 'date', 'time', 'busRouteID']
 
 
+class BookingHistorySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = BookingHistory
+        fields = ['id', 'bookingID', 'statusID', 'statusDate']
+
+
 class BookingSerializer(serializers.ModelSerializer):
+    # customerID = UserSerializer()
+    class Meta:
+        model = Booking
+        fields = ['id', 'customerID', 'name', 'phone', 'timeTable']
+
+
+class BillSerializer(serializers.ModelSerializer):
+    timeTable = TimeTableSerializer()
+    # seat = SeatSerializer()
     class Meta:
         model = Booking
         fields = ['id', 'customerID', 'name', 'phone', 'timeTable']
@@ -148,12 +169,6 @@ class BookingStatusSerializer(serializers.ModelSerializer):
     class Meta:
         model = BookingStatus
         fields = ['id', 'statusValue']
-
-
-class BookingHistorySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = BookingHistory
-        fields = ['id', 'bookingID', 'statusID', 'statusDate']
 
 
 class BookingDetailSerializer(serializers.ModelSerializer):

@@ -14,11 +14,13 @@ from pathlib import Path
 from datetime import timedelta
 from django.conf import settings
 import os
-
+import environ
 from decouple import config, Csv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, '../../.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -74,8 +76,8 @@ DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
 DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME = 0.5  # Time in hours
 
 OAUTH2_INFO = {
-    "client_id": "fv5KITO6P7n1ovB4mQ9l1KAS0dBlHnJo5xMsxq0Q",
-    "client_secret": "SAZVAkMkKF652cZ2Ua9GwVPJoMTD8d7OrKcROFrWDung4Z4WX2SAPydtIMEO7pAeNx83engtV6kXNdJH6CDVE0tCYAUE79kDuYPYEAjO90F60pHUD1v6C9dzPyFFZH9n",
+    "client_id": "VmKoD4unXL5xtvX0vE7hFT8qT2huezdxLkmV9IZ8",
+    "client_secret": "pEBqe0QQ3buBGZ8ZonpXpSbhnZEwHsZZah1Mw4c3Kp5R5twfaodopNZ6sg2s7jUqQz8iPy7ziPhIfZ1t3OVUDvV9Q8XcsyHZoiKk3VvXYhSq31sVfKi43qf3fhEq2uM6",
 }
 
 OAUTH2_PROVIDER = {
@@ -145,6 +147,16 @@ WSGI_APPLICATION = 'app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': env('DATABASE_NAME'),
+#         'USER': 'root',
+#         'PASSWORD': env('DATABASE_PASS'),
+#         'HOST': env('DATABASE_HOST'),# mặc định localhost
+#         'PORT': 3306
+#     }
+# }
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -154,7 +166,6 @@ DATABASES = {
         'HOST': '' # mặc định localhost
     }
 }
-
 AUTH_USER_MODEL = 'ticketapp.User'
 
 # Password validation
