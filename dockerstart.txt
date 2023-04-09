@@ -1,0 +1,1 @@
+sau dô này, mở cmd lên gõ docker-compose up, là server nó chạys

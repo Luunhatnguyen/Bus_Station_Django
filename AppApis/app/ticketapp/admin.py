@@ -10,7 +10,7 @@ from datetime import datetime
 
 
 class TicketAppAdminSite(admin.AdminSite):
-    site_header = 'TICKET MANAGEMENT'
+    site_header = 'BUS STATION'
 
     def get_urls(self):
         return [
@@ -239,7 +239,7 @@ class TicketAppAdminSite(admin.AdminSite):
         })
 
 
-admin_site = TicketAppAdminSite('TICKET MANAGEMENT')
+admin_site = TicketAppAdminSite('BUS STATION')
 # Register your models here.
 
 
@@ -284,10 +284,10 @@ class TypeBusAdmin(admin.ModelAdmin):
 
 
 class BusAdmin(admin.ModelAdmin):
-    list_display = ('id', 'busModel', 'typeBusID')
+    list_display = ('id', 'typeBusID')
     list_display_links = list_display
     list_filter = ('typeBusID', 'created_date')
-    search_fields = ('id', 'busModel')
+    # search_fields = ('id')
 
 
 class BusRouteAdmin(admin.ModelAdmin):
