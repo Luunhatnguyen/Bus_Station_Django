@@ -71,6 +71,9 @@ class User(AbstractUser):
                                  related_query_name='this_user_garage',
                                  null=True,
                                  on_delete=models.SET_NULL, blank=True)
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
 
     def __str__(self):
@@ -266,7 +269,10 @@ class Rating(ActionBase):
                                 on_delete=models.CASCADE)
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
 
 from twilio.rest import Client
 class Score(models.Model):
@@ -286,5 +292,9 @@ class Score(models.Model):
                 to='+84767642448'
             )
             print(message.sid)
+<<<<<<< Updated upstream
+        return super().save(*args, **kwargs)
+>>>>>>> Stashed changes
+=======
         return super().save(*args, **kwargs)
 >>>>>>> Stashed changes

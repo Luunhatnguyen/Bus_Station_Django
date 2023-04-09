@@ -29,11 +29,15 @@ import requests
 import hmac
 import hashlib
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import login, logout
 from django.core.mail import send_mail, EmailMessage
 from rest_framework.generics import GenericAPIView
+=======
+import teradata
+>>>>>>> Stashed changes
 =======
 import teradata
 >>>>>>> Stashed changes
@@ -284,6 +288,7 @@ class BusRouteViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPI
         return Response(data=UserSerializer(user, many=True,
                                             context={'request': request}).data,
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
                         status=status.HTTP_200_OK)
 
         # this api to get infor detail BusRoute by Bus id
@@ -294,6 +299,8 @@ class BusRouteViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPI
 
         return Response(data=BusRouteSerializer(busID, many=True,
                                                 context={'request': request}).data,
+=======
+>>>>>>> Stashed changes
 =======
 >>>>>>> Stashed changes
                         status=status.HTTP_200_OK)
@@ -386,7 +393,10 @@ class BookingViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIV
         booking_detail = BookingDetail.objects.filter(bookingID=booking.id, active=True)
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 =======
+=======
+>>>>>>> Stashed changes
         return Response(data=BookingDetailSerializer(booking_detail, many=True,
                                                      context={'request': request}).data,
                         status=status.HTTP_200_OK)
@@ -585,9 +595,12 @@ class Momo(viewsets.ViewSet):
             amount = str(request.data.get("amount"))
             self.orderInfo = str(request.data.get("name"))
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
             orderId = str(len(str(request.data.get("orderId")))) + '.' + str(uuid.uuid4()) + str(request.data.get("orderId"))
             requestId = str(len(str(request.data.get("orderId")))) + '.' + str(uuid.uuid4()) + str(request.data.get("orderId"))
 =======
+=======
+>>>>>>> Stashed changes
             orderId = str(len(str(request.data.get("orderId")))) + '.' + str(uuid.uuid4()) + str(
                 request.data.get("orderId"))
             requestId = str(len(str(request.data.get("orderId")))) + '.' + str(uuid.uuid4()) + str(
@@ -671,6 +684,7 @@ class Momo(viewsets.ViewSet):
 
 
 <<<<<<< Updated upstream
+<<<<<<< Updated upstream
 class GoogleSocialAuthView(GenericAPIView):
     serializer_class = GoogleSocialAuthSerializer
     permission_classes = [permissions.AllowAny]
@@ -707,6 +721,8 @@ class BusCarrierViewset(viewsets.ViewSet, generics.RetrieveAPIView):
                                                context={'request': request}).data,
                         status=status.HTTP_200_OK)
 =======
+=======
+>>>>>>> Stashed changes
 import base64
 
 
@@ -790,4 +806,7 @@ class SendSMS(viewsets.ViewSet):
             return Response(data=response.json(), status=status.HTTP_200_OK)
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
+<<<<<<< Updated upstream
+>>>>>>> Stashed changes
+=======
 >>>>>>> Stashed changes
