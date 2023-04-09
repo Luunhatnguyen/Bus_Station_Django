@@ -14,11 +14,13 @@ from pathlib import Path
 from datetime import timedelta
 from django.conf import settings
 import os
-
+import environ
 from decouple import config, Csv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+env = environ.Env()
+environ.Env.read_env(os.path.join(BASE_DIR, '../../.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.0/howto/deployment/checklist/
@@ -52,11 +54,13 @@ INSTALLED_APPS = [
     'drf_yasg',
     "corsheaders",
     'django_rest_passwordreset',
+    'rest_framework_simplejwt.token_blacklist',
 ]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
     ]
 }
 
@@ -72,8 +76,15 @@ DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
 DJANGO_REST_MULTITOKENAUTH_RESET_TOKEN_EXPIRY_TIME = 0.5  # Time in hours
 
 OAUTH2_INFO = {
+<<<<<<< HEAD
     "client_id": "maSzNJzP3CdNyGg9yQbMcaTz3gMVMjodKyNJyD7v",
     "client_secret": "E9JkNbgsr5JYabBvbyHOSuEkT8FrueHogHcvW8y6Xu80sKMT7MkDYMMFmsQAiWfYQYRHECb5k7z5x8TXv71djMEl5KyIOSEDGN8VdbVfm7B8hthmrQ7ySYbI1ii3bkTS",
+=======
+
+    "client_id": "VmKoD4unXL5xtvX0vE7hFT8qT2huezdxLkmV9IZ8",
+    "client_secret": "pEBqe0QQ3buBGZ8ZonpXpSbhnZEwHsZZah1Mw4c3Kp5R5twfaodopNZ6sg2s7jUqQz8iPy7ziPhIfZ1t3OVUDvV9Q8XcsyHZoiKk3VvXYhSq31sVfKi43qf3fhEq2uM6",
+
+>>>>>>> 12c98ada929b41e8a2db8e093989ee042a859519
 }
 
 OAUTH2_PROVIDER = {
@@ -143,6 +154,16 @@ WSGI_APPLICATION = 'app.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/4.0/ref/settings/#databases
 
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': env('DATABASE_NAME'),
+#         'USER': 'root',
+#         'PASSWORD': env('DATABASE_PASS'),
+#         'HOST': env('DATABASE_HOST'),# mặc định localhost
+#         'PORT': 3306
+#     }
+# }
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
@@ -152,7 +173,6 @@ DATABASES = {
         'HOST': '' # mặc định localhost
     }
 }
-
 AUTH_USER_MODEL = 'ticketapp.User'
 
 # Password validation
@@ -200,10 +220,10 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = '1951052134nguyen@ou.edu.vn'
-EMAIL_HOST_PASSWORD = 'coemtiphu2'
+EMAIL_HOST_USER = 'nhatnguyen.01102001@gmail.com'
+EMAIL_HOST_PASSWORD = 'bnbtlglyftisynpt'
 
-
+#momo
 MOMO_SECRET_KEY = config('MOMO_SECRET_KEY', default='')
 MOMO_ACCESS_KEY = config('MOMO_ACCESS_KEY', default='')
 MOMO_PARTNER_CODE = config('MOMO_PARTNER_CODE', default='')
@@ -217,6 +237,10 @@ ZALO_KEY2 = config('ZALO_KEY2', default='')
 ZALO_URL_CREATE = config('ZALO_URL_CREATE', default='')
 ZALO_URL_GET_STATUS = config('ZALO_URL_GET_STATUS', default='')
 
+#auth-social config
+GOOGLE_CLIENT_ID = '220466306476-5ob9trc1soalp0t2djma5f23jplrkga2.apps.googleusercontent.com'
+GOOGLE_CLIENT_SECRET = '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'
+SOCIAL_SECRET = '@gbklknspajdoughwblwdoiushuolnjhsuyu5w#@#%$'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
