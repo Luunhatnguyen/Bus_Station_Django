@@ -28,11 +28,15 @@ import uuid
 import requests
 import hmac
 import hashlib
+<<<<<<< Updated upstream
 from rest_framework.decorators import action, api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import login, logout
 from django.core.mail import send_mail, EmailMessage
 from rest_framework.generics import GenericAPIView
+=======
+import teradata
+>>>>>>> Stashed changes
 
 
 class GarageViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView,
@@ -279,6 +283,7 @@ class BusRouteViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPI
         user = User.objects.filter(this_booking_user__timeTable__busRouteID__id=busroute.id)
         return Response(data=UserSerializer(user, many=True,
                                             context={'request': request}).data,
+<<<<<<< Updated upstream
                         status=status.HTTP_200_OK)
 
         # this api to get infor detail BusRoute by Bus id
@@ -289,6 +294,8 @@ class BusRouteViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPI
 
         return Response(data=BusRouteSerializer(busID, many=True,
                                                 context={'request': request}).data,
+=======
+>>>>>>> Stashed changes
                         status=status.HTTP_200_OK)
 
 
@@ -378,6 +385,18 @@ class BookingViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIV
         booking = self.get_object()
         booking_detail = BookingDetail.objects.filter(bookingID=booking.id, active=True)
 
+<<<<<<< Updated upstream
+=======
+        return Response(data=BookingDetailSerializer(booking_detail, many=True,
+                                                     context={'request': request}).data,
+                        status=status.HTTP_200_OK)
+
+    @action(methods=['get'], detail=True, url_path='booking-delete')
+    def booking_delete(self, request):
+        booking = self.get_object().delete()
+        booking_detail = BookingDetail.objects.filter(bookingID=booking.id, active=True)
+
+>>>>>>> Stashed changes
         return Response(data=BookingDetailSerializer(booking_detail, many=True,
                                                      context={'request': request}).data,
                         status=status.HTTP_200_OK)
@@ -559,13 +578,24 @@ class Momo(viewsets.ViewSet):
     requestType = "captureWallet"
     storeId = "Bus station"
     lang = "vi"
+
     @action(methods=['post'], detail=False, url_path='')
     def request_momo(self, request):
         if request.method == "POST":
             amount = str(request.data.get("amount"))
             self.orderInfo = str(request.data.get("name"))
+<<<<<<< Updated upstream
             orderId = str(len(str(request.data.get("orderId")))) + '.' + str(uuid.uuid4()) + str(request.data.get("orderId"))
             requestId = str(len(str(request.data.get("orderId")))) + '.' + str(uuid.uuid4()) + str(request.data.get("orderId"))
+=======
+            orderId = str(len(str(request.data.get("orderId")))) + '.' + str(uuid.uuid4()) + str(
+                request.data.get("orderId"))
+            requestId = str(len(str(request.data.get("orderId")))) + '.' + str(uuid.uuid4()) + str(
+                request.data.get("orderId"))
+            # rawSignature = "accessKey=" + self.accessKey + "&amount=" + amount  + "&extraData=" + self.extraData + "&ipnUrl=" + self.ipnUrl + "&orderId=" + orderId \
+            #                + "&orderInfo=" + orderInfo + "&partnerCode=" + self.partnerCode + "&redirectUrl=" + self.redirectUrl \
+            #                + "&requestId=" + requestId + "&requestType=" + self.requestType
+>>>>>>> Stashed changes
             rawSignature = "accessKey=" + self.accessKey + "&amount=" + amount + "&extraData=" + self.extraData + "&ipnUrl=" + self.ipnUrl + "&orderId=" + orderId \
                            + "&orderInfo=" + self.orderInfo + "&partnerCode=" + self.partnerCode + "&redirectUrl=" + self.redirectUrl \
                            + "&requestId=" + requestId + "&requestType=" + self.requestType
@@ -619,16 +649,17 @@ class Momo(viewsets.ViewSet):
                     quantity = len(BookingDetail.objects.filter(bookingID=d.bookingID.id))
                     if selfOrderId == orderId[-int(orderId[0:orderId.index('.')]):] \
                             and float(amount) == selfAmount.timeTable.busRouteID.price * quantity * (1 - percentage):
-                        raw = "accessKey=" + self.accessKey + "&amount=" + amount  +\
+                        raw = "accessKey=" + self.accessKey + "&amount=" + amount + \
                               "&extraData=" + self.extraData + "&message=" + message + \
                               "&orderId=" + orderId + "&orderInfo=" + self.orderInfo + \
                               "&orderType=" + orderType + "&partnerCode=" + self.partnerCode + \
                               "&payType=" + payType + "&requestId=" + requestId + \
                               "&responseTime=" + responseTime + \
                               "&resultCode=" + resultCode + "&transId=" + transId
-                        selfSignature = str(hmac.new(bytes(self.secretKey, 'ascii'), bytes(raw, 'utf-8'), hashlib.sha256).hexdigest())
+                        selfSignature = str(
+                            hmac.new(bytes(self.secretKey, 'ascii'), bytes(raw, 'utf-8'), hashlib.sha256).hexdigest())
                         print(signature, selfSignature)
-                        if(signature == selfSignature):
+                        if (signature == selfSignature):
                             try:
                                 d.statusID = BookingStatus.objects.get(id=1)
                                 d.save()
@@ -639,6 +670,7 @@ class Momo(viewsets.ViewSet):
             return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
 
 
+<<<<<<< Updated upstream
 class GoogleSocialAuthView(GenericAPIView):
     serializer_class = GoogleSocialAuthSerializer
     permission_classes = [permissions.AllowAny]
@@ -674,3 +706,88 @@ class BusCarrierViewset(viewsets.ViewSet, generics.RetrieveAPIView):
         return Response(data=BusSerializer(userID, many=True,
                                                context={'request': request}).data,
                         status=status.HTTP_200_OK)
+=======
+import base64
+
+
+class SendSMSConfirm(viewsets.ViewSet):
+
+    @action(methods=['get'], detail=False, url_path='')
+    def get_user_info(self):
+        access_token = 'ccenzPs5NwBiqU1ObZnfAMdFIwEt8t-L'
+        API_URL = "https://api.speedsms.vn/index.php";
+        api_url = API_URL + "/user/info"
+        headers = {
+            'Authorization': f'Basic {base64.b64encode(access_token.encode()).decode()}'
+        }
+        response = requests.get(api_url, headers=headers)
+        return Response(data=response.json(), status=status.HTTP_200_OK)
+
+    @action(methods=['post'], detail=False, url_path='')
+    def send(self, request):
+        access_token = 'ccenzPs5NwBiqU1ObZnfAMdFIwEt8t-L'
+        API_URL = "https://api.speedsms.vn/index.php"
+        sender = 'Nguyen Station'
+
+        if request.method == "POST":
+            toNumber = request.data.get("toNumber")
+            content = str(request.data.get("content"))
+
+            # decode for content
+            encoded_value = ""
+            for c in content:
+                unit = ord(c)
+                if unit > 127:
+                    hex_code = hex(unit)[2:]
+                    encoded_value += "\\u" + "0" * (4 - len(hex_code)) + hex_code
+                else:
+                    encoded_value += c
+
+            # action send sms
+            api_url = API_URL + "/sms/send"
+            headers = {
+                'Authorization': f'Basic {base64.b64encode(access_token.encode()).decode()}',
+                'Content-Type': 'application/json'
+            }
+            data = {
+                'to': [toNumber],
+                'content': encoded_value,
+                'type': 2,
+                'brandname': sender
+            }
+            json_data = json.dumps(data)
+            response = requests.post(api_url, headers=headers, data=json_data)
+
+            return Response(data=response.json(), status=status.HTTP_200_OK)
+
+        return Response(status=status.HTTP_406_NOT_ACCEPTABLE)
+
+
+# https://developers.africastalking.com/simulator
+# acccount: huynguyenvo2001@gmail.com
+# phoneNumber: 0767642448 + (+254)
+class SendSMS(viewsets.ViewSet):
+    @action(methods=['post'], detail=False, url_path='')
+    def sendByPython(self, request):
+        url = "https://api.sandbox.africastalking.com/version1/messaging"
+        headers = {'ApiKey': 'fdce86a74390ad6960daf43c08ab23aa727cb1285be2ea1dbd4d61331ed5c83f',
+                   'Content-Type': 'application/x-www-form-urlencoded',
+                   'Accept': 'application/json'}
+
+        if request.method == "POST":
+            message = request.data.get("message")
+            to = str(request.data.get("to"))
+
+            data = {'username': 'sandbox',
+                    'from': '12021',
+                    'message': message,
+                    'to': to
+                    }
+            print(data)
+
+            response = requests.post(url=url, data=data,
+                                     headers=headers)
+            return Response(data=response.json(), status=status.HTTP_200_OK)
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+>>>>>>> Stashed changes
