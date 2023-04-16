@@ -60,18 +60,10 @@ class User(AbstractUser):
     phone = models.CharField(max_length=11, unique=True, null=True)
     email = models.EmailField(unique=True, null=True)
     isCarrier = models.BooleanField(default=False)
-<<<<<<< Updated upstream
 
     auth_provider = models.CharField(
         max_length=255, blank=False,
         null=False, default=AUTH_PROVIDERS.get('default'))
-=======
-    garageID = models.ForeignKey(Garage,
-                                 related_name='user_garage',
-                                 related_query_name='this_user_garage',
-                                 null=True,
-                                 on_delete=models.SET_NULL, blank=True)
->>>>>>> Stashed changes
 
     def __str__(self):
         return self.username
@@ -113,13 +105,51 @@ class TypeBus(ModelBase):
     def __str__(self):
         return self.name
 
+# Tạo table cho phí hệ thống dành cho nhà xe
+class HireOption(ModelBase):
+    id = models.CharField(primary_key=True, max_length=255)
+    option = models.CharField(max_length=255, blank=True)
+    description = models.CharField(max_length=255, blank=True)
+    fee = models.FloatField()
+    numberOfVehicles = models.IntegerField(default=1)
+    rentalPeriod = models.IntegerField(default=1)
+
+
+class Carrier(ModelBase):
+    userID = models.ForeignKey(User,
+                               related_name='carrier',
+                               related_query_name='this_carrier_user',
+                               null=True,
+                               on_delete=models.CASCADE)
+    nameCarrier = models.CharField(max_length=255, unique=True)
+    garageID = models.ForeignKey(Garage,
+                                 related_name='carrier_garage',
+                                 related_query_name='this_carrier_garage',
+                                 null=True,
+                                 on_delete=models.SET_NULL, blank=True)
+    optionID = models.ForeignKey(HireOption,
+                                 related_name='carrier',
+                                 related_query_name='this_carrier_optionID',
+                                 null=True,
+                                 on_delete=models.CASCADE)
+    class StatusCode(models.TextChoices):
+        APPROVE = 'APPROVE'
+        NOTAPPROVE = 'NOT APPROVE'
+        PENDING = 'PENDING'
+
+    status_code = models.CharField(
+        max_length=12,
+        choices=StatusCode.choices,
+        default=StatusCode.PENDING,
+    )
 
 class Bus(ModelBase):
     typeBusID = models.ForeignKey(TypeBus,
-                                  related_name='bus_typeBus',
-                                  related_query_name='this_bus_typeBus',
-                                  on_delete=models.CASCADE)
-    userID = models.ForeignKey(User, on_delete=models.CASCADE)
+                                related_name='bus_typeBus',
+                                related_query_name='this_bus_typeBus',
+                                on_delete=models.CASCADE)
+    carrierID = models.ForeignKey(Carrier, on_delete=models.CASCADE)
+
     name = models.CharField(max_length=255, unique=True)
     numberplate = models.CharField(max_length=255, unique=True,default=0)
     image = models.ImageField(null=True, upload_to='image/%Y/%m')
@@ -264,27 +294,3 @@ class Rating(ActionBase):
                                 related_query_name='this_rating_comment',
                                 null=True,
                                 on_delete=models.CASCADE)
-
-<<<<<<< Updated upstream
-=======
-
-from twilio.rest import Client
-class Score(models.Model):
-    result = models.PositiveIntegerField()
-
-    def __str__(self):
-        return str(self.result)
-
-    def save(self, *args, **kwargs):
-        if self.result < 70:
-            account_sid = 'ACae6047686b3e81e0c1cb0865391440d9'
-            auth_token = 'ffc75448a33cd6f43f7c17eb01e20f49'
-            client = Client(account_sid, auth_token)
-            message = client.messages.create(
-                body="Hello friend, this is Nguyen application",
-                from_='+12765215948',
-                to='+84767642448'
-            )
-            print(message.sid)
-        return super().save(*args, **kwargs)
->>>>>>> Stashed changes

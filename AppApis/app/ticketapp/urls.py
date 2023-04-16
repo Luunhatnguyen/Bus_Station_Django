@@ -27,6 +27,7 @@ router.register(prefix='ratings', viewset=views.RatingViewSet, basename='rating'
 router.register(prefix='momo', viewset=views.Momo, basename='momo')
 <<<<<<< Updated upstream
 router.register(prefix='send_mail_booking', viewset=views.BookingEmail, basename='send_mail_booking')
+router.register(prefix='carrier', viewset=views.CarrierViewSet, basename='carrier')
 
 =======
 router.register(prefix='SendSMS', viewset=views.SendSMS, basename='SendSMS')
@@ -47,5 +48,5 @@ urlpatterns = [
     path('reset/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(), name='password_reset_confirm',),
     path('reset/done/', auth_views.PasswordResetCompleteView.as_view(), name='password_reset_complete',),
     path('register/', UserRegisterView.as_view(), name='register'),
-    path('carrier/', CarrierViewSet.as_view(), name='carierLogin'),
+    path('carier-login/', CarrierViewSetAuth.as_view(), name='carierLogin'),
 ]

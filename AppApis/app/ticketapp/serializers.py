@@ -290,4 +290,11 @@ class FacebookSocialAuthSerializer(serializers.Serializer):
 
             raise serializers.ValidationError(
                 'The token  is invalid or expired. Please login again.'
+
             )
+class CarrierSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Carrier
+        fields = '__all__'
+
+
