@@ -159,7 +159,7 @@ class UserRegisterView(APIView):
             }, status=status.HTTP_400_BAD_REQUEST)
 
 
-class CarrierViewSet(APIView):
+class CarrierViewSetAuth(APIView):
     def post(self, request):
         serializer = CarrierLoginSerializer(data=request.data)
         if serializer.is_valid():
@@ -667,10 +667,15 @@ class BusCarrierViewset(viewsets.ViewSet, generics.RetrieveAPIView):
 
     @action(methods=['get'], detail=True, url_path='')
     def get_bus_by_carrier(self, request, pk):
-        user = self.get_object()
-        # lấy theo bảng user id
-        userID = Bus.objects.filter(userID=user.id, active=True)
+        carrier = self.get_object()
+        # lấy theo bảng carrier id
+        carrierID = Bus.objects.filter(carrierID=carrier.id, active=True)
 
         return Response(data=BusSerializer(userID, many=True,
                                                context={'request': request}).data,
                         status=status.HTTP_200_OK)
+
+class CarrierViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView,
+                  generics.RetrieveAPIView):
+    queryset = Carrier.objects.filter(active=True)
+    serializer_class = CarrierSerializer

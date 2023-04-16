@@ -105,13 +105,50 @@ class TypeBus(ModelBase):
     def __str__(self):
         return self.name
 
+# Tạo table cho phí hệ thống dành cho nhà xe
+class HireOption(ModelBase):
+    id = models.CharField(primary_key=True, max_length=255)
+    option = models.CharField(max_length=255, blank=True)
+    description = models.CharField(max_length=255, blank=True)
+    fee = models.FloatField()
+    numberOfVehicles = models.IntegerField(default=1)
+    rentalPeriod = models.IntegerField(default=1)
+
+
+class Carrier(ModelBase):
+    userID = models.ForeignKey(User,
+                               related_name='carrier',
+                               related_query_name='this_carrier_user',
+                               null=True,
+                               on_delete=models.CASCADE)
+    nameCarrier = models.CharField(max_length=255, unique=True)
+    garageID = models.ForeignKey(Garage,
+                                 related_name='carrier_garage',
+                                 related_query_name='this_carrier_garage',
+                                 null=True,
+                                 on_delete=models.SET_NULL, blank=True)
+    optionID = models.ForeignKey(HireOption,
+                                 related_name='carrier',
+                                 related_query_name='this_carrier_optionID',
+                                 null=True,
+                                 on_delete=models.CASCADE)
+    class StatusCode(models.TextChoices):
+        APPROVE = 'APPROVE'
+        NOTAPPROVE = 'NOT APPROVE'
+        PENDING = 'PENDING'
+
+    status_code = models.CharField(
+        max_length=12,
+        choices=StatusCode.choices,
+        default=StatusCode.PENDING,
+    )
 
 class Bus(ModelBase):
     typeBusID = models.ForeignKey(TypeBus,
                                 related_name='bus_typeBus',
                                 related_query_name='this_bus_typeBus',
                                 on_delete=models.CASCADE)
-    userID = models.ForeignKey(User, on_delete=models.CASCADE)
+    carrierID = models.ForeignKey(Carrier, on_delete=models.CASCADE)
     name = models.CharField(max_length=255, unique=True)
     numberplate = models.CharField(max_length=255, unique=True,default=0)
     image = models.ImageField(null=True, upload_to='image/%Y/%m')
