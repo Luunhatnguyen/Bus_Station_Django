@@ -33,6 +33,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import login, logout
 from django.core.mail import send_mail, EmailMessage
 from rest_framework.generics import GenericAPIView
+import teradata
+
 
 
 class GarageViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView,
@@ -278,18 +280,16 @@ class BusRouteViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPI
         busroute = self.get_object()
         user = User.objects.filter(this_booking_user__timeTable__busRouteID__id=busroute.id)
         return Response(data=UserSerializer(user, many=True,
-                                            context={'request': request}).data,
-                        status=status.HTTP_200_OK)
+                                            context={'request': request}).data, status=status.HTTP_200_OK)
 
-        # this api to get infor detail BusRoute by Bus id
+    # this api to get infor detail BusRoute by Bus id
     @action(methods=['get'], detail=True, url_path='')
     def get_route_by_bus(self, request, pk):
         bus = self.get_object()
         busID = BusRoute.objects.filter(busID_id=bus.id, active=True)
 
         return Response(data=BusRouteSerializer(busID, many=True,
-                                                context={'request': request}).data,
-                        status=status.HTTP_200_OK)
+                                                context={'request': request}).data, status=status.HTTP_200_OK)
 
 
 class SeatViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView,
@@ -559,13 +559,19 @@ class Momo(viewsets.ViewSet):
     requestType = "captureWallet"
     storeId = "Bus station"
     lang = "vi"
+
     @action(methods=['post'], detail=False, url_path='')
     def request_momo(self, request):
         if request.method == "POST":
             amount = str(request.data.get("amount"))
             self.orderInfo = str(request.data.get("name"))
-            orderId = str(len(str(request.data.get("orderId")))) + '.' + str(uuid.uuid4()) + str(request.data.get("orderId"))
-            requestId = str(len(str(request.data.get("orderId")))) + '.' + str(uuid.uuid4()) + str(request.data.get("orderId"))
+            orderId = str(len(str(request.data.get("orderId")))) + '.' + str(uuid.uuid4()) + str(
+                request.data.get("orderId"))
+            requestId = str(len(str(request.data.get("orderId")))) + '.' + str(uuid.uuid4()) + str(
+                request.data.get("orderId"))
+            # rawSignature = "accessKey=" + self.accessKey + "&amount=" + amount  + "&extraData=" + self.extraData + "&ipnUrl=" + self.ipnUrl + "&orderId=" + orderId \
+            #                + "&orderInfo=" + orderInfo + "&partnerCode=" + self.partnerCode + "&redirectUrl=" + self.redirectUrl \
+            #                + "&requestId=" + requestId + "&requestType=" + self.requestType
             rawSignature = "accessKey=" + self.accessKey + "&amount=" + amount + "&extraData=" + self.extraData + "&ipnUrl=" + self.ipnUrl + "&orderId=" + orderId \
                            + "&orderInfo=" + self.orderInfo + "&partnerCode=" + self.partnerCode + "&redirectUrl=" + self.redirectUrl \
                            + "&requestId=" + requestId + "&requestType=" + self.requestType
@@ -619,16 +625,17 @@ class Momo(viewsets.ViewSet):
                     quantity = len(BookingDetail.objects.filter(bookingID=d.bookingID.id))
                     if selfOrderId == orderId[-int(orderId[0:orderId.index('.')]):] \
                             and float(amount) == selfAmount.timeTable.busRouteID.price * quantity * (1 - percentage):
-                        raw = "accessKey=" + self.accessKey + "&amount=" + amount  +\
+                        raw = "accessKey=" + self.accessKey + "&amount=" + amount + \
                               "&extraData=" + self.extraData + "&message=" + message + \
                               "&orderId=" + orderId + "&orderInfo=" + self.orderInfo + \
                               "&orderType=" + orderType + "&partnerCode=" + self.partnerCode + \
                               "&payType=" + payType + "&requestId=" + requestId + \
                               "&responseTime=" + responseTime + \
                               "&resultCode=" + resultCode + "&transId=" + transId
-                        selfSignature = str(hmac.new(bytes(self.secretKey, 'ascii'), bytes(raw, 'utf-8'), hashlib.sha256).hexdigest())
+                        selfSignature = str(
+                            hmac.new(bytes(self.secretKey, 'ascii'), bytes(raw, 'utf-8'), hashlib.sha256).hexdigest())
                         print(signature, selfSignature)
-                        if(signature == selfSignature):
+                        if (signature == selfSignature):
                             try:
                                 d.statusID = BookingStatus.objects.get(id=1)
                                 d.save()
@@ -687,3 +694,32 @@ class CarrierViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIV
         return Response(data=BusSerializer(carrierID_id, many=True,
                                                context={'request': request}).data,
                         status=status.HTTP_200_OK)
+
+# https://developers.africastalking.com/simulator
+# acccount: huynguyenvo2001@gmail.com
+# phoneNumber: 0767642448 + (+254)
+class SendSMS(viewsets.ViewSet):
+    @action(methods=['post'], detail=False, url_path='')
+    def sendByPython(self, request):
+        url = "https://api.sandbox.africastalking.com/version1/messaging"
+        headers = {'ApiKey': 'fdce86a74390ad6960daf43c08ab23aa727cb1285be2ea1dbd4d61331ed5c83f',
+                   'Content-Type': 'application/x-www-form-urlencoded',
+                   'Accept': 'application/json'}
+
+        if request.method == "POST":
+            message = request.data.get("message")
+            to = str(request.data.get("to"))
+
+            data = {'username': 'sandbox',
+                    'from': '12021',
+                    'message': message,
+                    'to': to
+                    }
+            print(data)
+
+            response = requests.post(url=url, data=data,
+                                     headers=headers)
+            return Response(data=response.json(), status=status.HTTP_200_OK)
+
+        return Response(status=status.HTTP_400_BAD_REQUEST)
+

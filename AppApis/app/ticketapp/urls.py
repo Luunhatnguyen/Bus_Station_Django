@@ -25,9 +25,13 @@ router.register(prefix='buscarrier', viewset=views.BusCarrierViewset, basename='
 router.register(prefix='comments', viewset=views.CommentViewSet, basename='comment')
 router.register(prefix='ratings', viewset=views.RatingViewSet, basename='rating')
 router.register(prefix='momo', viewset=views.Momo, basename='momo')
+<<<<<<< Updated upstream
 router.register(prefix='send_mail_booking', viewset=views.BookingEmail, basename='send_mail_booking')
 router.register(prefix='carrier', viewset=views.CarrierViewSet, basename='carrier')
 
+=======
+router.register(prefix='SendSMS', viewset=views.SendSMS, basename='SendSMS')
+>>>>>>> Stashed changes
 
 urlpatterns = [
     path('', include(router.urls)),

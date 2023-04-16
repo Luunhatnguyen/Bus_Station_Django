@@ -36,13 +36,13 @@ class Garage(ModelBase):
     name = models.CharField(max_length=255, unique=True)
     address = models.CharField(max_length=255, unique=True)
     cityID = models.ForeignKey(City,
-                                related_name='garage_city',
-                                related_query_name='this_garage_city',
-                                on_delete=models.CASCADE)
+                               related_name='garage_city',
+                               related_query_name='this_garage_city',
+                               on_delete=models.CASCADE)
     districtID = models.ForeignKey(District,
-                                related_name='garage_district',
-                                related_query_name='this_garage_district',
-                                on_delete=models.CASCADE)
+                                   related_name='garage_district',
+                                   related_query_name='this_garage_district',
+                                   on_delete=models.CASCADE)
 
     def __str__(self):
         return self.name
@@ -83,13 +83,13 @@ class Route(ModelBase):
     destination = models.CharField(max_length=255, default="0")
     hours = models.CharField(max_length=255, default="0")
     city_from = models.ForeignKey(City,
-                               related_name='route_city',
-                               related_query_name='this_route_city',
-                               on_delete=models.CASCADE)
+                                  related_name='route_city',
+                                  related_query_name='this_route_city',
+                                  on_delete=models.CASCADE)
     to_garage = models.ForeignKey(Garage,
-                                related_name='route_to_garage',
-                                related_query_name='this_route_to_garage',
-                                on_delete=models.CASCADE)
+                                  related_name='route_to_garage',
+                                  related_query_name='this_route_to_garage',
+                                  on_delete=models.CASCADE)
     rating = models.FloatField(null=True, blank=True)
 
     class Meta:
@@ -149,6 +149,7 @@ class Bus(ModelBase):
                                 related_query_name='this_bus_typeBus',
                                 on_delete=models.CASCADE)
     carrierID = models.ForeignKey(Carrier, on_delete=models.CASCADE)
+
     name = models.CharField(max_length=255, unique=True)
     numberplate = models.CharField(max_length=255, unique=True,default=0)
     image = models.ImageField(null=True, upload_to='image/%Y/%m')
@@ -166,9 +167,9 @@ class Bus(ModelBase):
 
 class BusRoute(ModelBase):
     busID = models.ForeignKey(Bus,
-                                related_name='busRoute_busID',
-                                related_query_name='this_busRoute_busID',
-                                on_delete=models.CASCADE)
+                              related_name='busRoute_busID',
+                              related_query_name='this_busRoute_busID',
+                              on_delete=models.CASCADE)
     routeID = models.ForeignKey(Route,
                                 related_name='busRoute_routeID',
                                 related_query_name='this_busRoute_routeID',
@@ -185,9 +186,9 @@ class BusRoute(ModelBase):
 class Seat(ModelBase):
     location = models.CharField(max_length=255)
     typeBusID = models.ForeignKey(TypeBus,
-                                related_name='seat_typeBus',
-                                related_query_name='this_seat_typeBus',
-                                on_delete=models.CASCADE)
+                                  related_name='seat_typeBus',
+                                  related_query_name='this_seat_typeBus',
+                                  on_delete=models.CASCADE)
 
     def __str__(self):
         return ("{0}_{1}").format(self.location, self.typeBusID)
@@ -202,9 +203,9 @@ class TimeTable(ModelBase):
                                null=True,
                                on_delete=models.SET_NULL)
     busRouteID = models.ForeignKey(BusRoute,
-                                related_name='timeTable_busRouteID',
-                                related_query_name='this_timeTable_busRouteID',
-                                on_delete=models.CASCADE)
+                                   related_name='timeTable_busRouteID',
+                                   related_query_name='this_timeTable_busRouteID',
+                                   on_delete=models.CASCADE)
 
     def __str__(self):
         return ("{0}_{1}_{2}").format(self.date, self.time, self.busRouteID)
@@ -212,10 +213,10 @@ class TimeTable(ModelBase):
 
 class Booking(ModelBase):
     customerID = models.ForeignKey(User,
-                                related_name='booking_user',
-                                related_query_name='this_booking_user',
-                                null=True,blank=True,
-                                on_delete=models.SET_NULL)
+                                   related_name='booking_user',
+                                   related_query_name='this_booking_user',
+                                   null=True, blank=True,
+                                   on_delete=models.SET_NULL)
     name = models.CharField(max_length=255, blank=True)
     phone = models.CharField(max_length=255)
     timeTable = models.ForeignKey(TimeTable,
@@ -235,15 +236,15 @@ class BookingDetail(ModelBase):
                                   related_query_name='this_bookingDetail_booking',
                                   on_delete=models.CASCADE)
     from_garage = models.ForeignKey(Garage,
-                                related_name='booking_from_garage',
-                                related_query_name='this_booking_from_garage',
-                                null=True,
-                                on_delete=models.SET_NULL)
+                                    related_name='booking_from_garage',
+                                    related_query_name='this_booking_from_garage',
+                                    null=True,
+                                    on_delete=models.SET_NULL)
     seatID = models.ForeignKey(Seat,
-                                related_name='booking_seat',
-                                related_query_name='this_booking_seat',
-                                null=True,
-                                on_delete=models.SET_NULL)
+                               related_name='booking_seat',
+                               related_query_name='this_booking_seat',
+                               null=True,
+                               on_delete=models.SET_NULL)
 
 
 class BookingStatus(ModelBase):
@@ -258,18 +259,18 @@ class BookingHistory(ModelBase):
                                      related_query_name='this_bookinghistory_booking',
                                      on_delete=models.CASCADE)
     statusID = models.ForeignKey(BookingStatus,
-                                related_name='bookinghistory_status',
-                                related_query_name='this_bookinghistory_status',
-                                null=True,
-                                on_delete=models.SET_NULL)
+                                 related_name='bookinghistory_status',
+                                 related_query_name='this_bookinghistory_status',
+                                 null=True,
+                                 on_delete=models.SET_NULL)
     statusDate = models.DateTimeField(auto_now_add=True)
 
 
 class Comment(ModelBase):
     content = models.TextField()
     busroute = models.ForeignKey(BusRoute,
-                               related_name='comments',
-                               on_delete=models.CASCADE)
+                                 related_name='comments',
+                                 on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
@@ -293,4 +294,3 @@ class Rating(ActionBase):
                                 related_query_name='this_rating_comment',
                                 null=True,
                                 on_delete=models.CASCADE)
-
