@@ -667,25 +667,33 @@ class FacebookSocialAuthView(GenericAPIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
-#this api to get infor of bus by carrier id
 class BusCarrierViewset(viewsets.ViewSet, generics.RetrieveAPIView):
     queryset = Bus.objects.filter(active=True)
     serializer_class = BusSerializer()
-
-    @action(methods=['get'], detail=True, url_path='')
-    def get_bus_by_carrier(self, request, pk):
-        carrier = self.get_object()
-        # lấy theo bảng carrier id
-        carrierID = Bus.objects.filter(carrierID=carrier.id, active=True)
-
-        return Response(data=BusSerializer(userID, many=True,
-                                               context={'request': request}).data,
-                        status=status.HTTP_200_OK)
 
 class CarrierViewSet(viewsets.ViewSet, generics.CreateAPIView, generics.ListAPIView, generics.UpdateAPIView,
                   generics.RetrieveAPIView):
     queryset = Carrier.objects.filter(active=True)
     serializer_class = CarrierSerializer
+
+    @action(methods=['get'], detail=True, url_path='')
+    def get_carrier_by_userID(self, request, pk):
+        user = self.get_object()
+        userID = Carrier.objects.filter(userID=user.id, active=True)
+
+        return Response(data=CarrierSerializer(userID, many=True,
+                                           context={'request': request}).data,
+                        status=status.HTTP_200_OK)
+
+    @action(methods=['get'], detail=True, url_path='')
+
+    def get_bus_by_carrierID(self, request, pk):
+        bus = self.get_object()
+        carrierID_id = Bus.objects.filter(carrierID_id=bus.id, active=True)
+
+        return Response(data=BusSerializer(carrierID_id, many=True,
+                                               context={'request': request}).data,
+                        status=status.HTTP_200_OK)
 
 # https://developers.africastalking.com/simulator
 # acccount: huynguyenvo2001@gmail.com
@@ -714,5 +722,4 @@ class SendSMS(viewsets.ViewSet):
             return Response(data=response.json(), status=status.HTTP_200_OK)
 
         return Response(status=status.HTTP_400_BAD_REQUEST)
-
 
