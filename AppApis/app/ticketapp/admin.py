@@ -7,6 +7,7 @@ from django.contrib.auth.models import Group
 from .models import *
 from django.utils.html import mark_safe
 from datetime import datetime
+from django import forms
 
 
 class TicketAppAdminSite(admin.AdminSite):
@@ -15,8 +16,23 @@ class TicketAppAdminSite(admin.AdminSite):
     def get_urls(self):
         return [
             path('stats-view/', self.stats_views),
-            path('booking-view/', self.booking_view)
+            path('booking-view/', self.booking_view),
+            path('listCarrier/', self.list_carrier)
         ] + super().get_urls()
+
+    class NameForm(forms.Form):
+        body = forms.CharField(required=True)
+    def list_carrier(self, request):
+        carrier = Carrier.objects.all()
+        if request.method == "POST":
+            form = NameForm(request.POST)
+            decision = request.GET.get('decision', "")
+            print(decision)
+
+        return TemplateResponse(request, 'admin/listCarrier.html', {
+            'carrier': carrier,
+            'decision': decision,
+        })
 
     def stats_views(self, request):
 
@@ -344,3 +360,4 @@ admin_site.register(BookingHistory, BookingHistoryAdmin)
 admin_site.register(Group)
 admin_site.register(District)
 admin_site.register(City)
+admin_site.register(Carrier)

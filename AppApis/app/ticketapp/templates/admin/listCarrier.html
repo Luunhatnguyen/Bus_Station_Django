@@ -1,0 +1,51 @@
+{% extends 'admin/base_site.html' %}
+
+{% block content %}
+{% if user.is_superuser %}
+<h1 class="text-center text-info" style="margin: 25px">TRẠNG THÁI CÁC NHÀ XE HIỆN CÓ</h1>
+
+<div class="modal-login">
+    <form method="POST" action="/admin/listCarrier" id="decision"> {% csrf_token %}
+                <div >
+                   <table class="table" >
+                      <tr>
+                        <th>Ngày đăng ký</th>
+                        <th>Lần cập nhật gần đây</th>
+                        <th>Tên nhà xe</th>
+                        <th>Trạng thái</th>
+                        <th>Nơi xuất phát</th>
+                        <th>Gói lựa chọn</th>
+                        <th>Tài khoản đăng ký</th>
+                     </tr>
+                    {% for s in carrier %}
+                     <tr>
+                         <td>{{ s.created_date }}</td>
+                         <td>{{ s.updated_date }}</td>
+                         <td>{{ s.nameCarrier }}</td>
+                         <td>{{ s.status_code }}</td>
+                         <td>{{ s.garageID }}</td>
+                         <td>{{ s.optionID.description }}</td>
+                         <td>{{ s.userID }}</td>
+                         <td>
+                             {% if s.status_code == "PENDING" %}
+                                <button form="decision" name="decision" type="submit" value="APPROVE">APPROVE</button>
+                             {{ else }}
+                                <button form="decision" name="decision" type="submit" value="NOT APPROVE">NOT APPROVE</button>
+                             {% endif %}
+                             {% if s.status_code == "APPROVE" %}
+                                <button form="decision" name="decision" type="submit" value="TERMINATE">TERMINATE</button>
+                             {% endif %}
+                         </td>
+                     </tr>
+                    {% endfor %}
+                   </table>
+                </div>
+         {{form}}
+     </form>
+</div>
+
+<br><br>
+{% else %}
+<h1 class="text-center text-danger">YOU ARE DO NOT HAVE PERMISSION TO SEE THIS VIEW!!</h1>
+{% endif %}
+{% endblock %}
